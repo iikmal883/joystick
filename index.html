@@ -1,175 +1,646 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ikmal Tech Quick Clipboard</title>
-    <!-- Tailwind CSS for modern mobile-first styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Smooth transitions and mobile feel */
-        body {
-            -webkit-tap-highlight-color: transparent;
-        }
-    </style>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ikmal hensem - micro:bit Controller</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
 
-    <!-- Header -->
-    <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-10 shadow-md">
-        <div class="max-w-md mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-lg font-bold tracking-wide text-purple-400">Ikmal Tech Solution</h1>
-                <p class="text-xs text-slate-400">Quick Clipboard Manager</p>
-            </div>
-            <span class="bg-purple-900/60 text-purple-300 text-xs px-2.5 py-1 rounded-full font-medium border border-purple-700/50">1-Tap Copy</span>
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #16213e 0%, #0b0f19 100%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Amaran jika telefon dalam mod Portrait */
+    #portrait-warning {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0b0f19;
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    #portrait-warning h2 {
+      color: #00f5d4;
+      margin-bottom: 10px;
+      font-size: 1.4rem;
+    }
+
+    #portrait-warning p {
+      color: #cbd5e1;
+      font-size: 1rem;
+    }
+
+    @media screen and (orientation: portrait) {
+      #portrait-warning {
+        display: flex;
+      }
+    }
+
+    /* Susun Atur Utama */
+    .container {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+      padding: 12px 20px;
+    }
+
+    /* Bar Atas */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 54px;
+      padding: 0 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #00f5d4, #00bbf9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .bt-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .status-badge.connected {
+      background: rgba(16, 185, 129, 0.18);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    .status-badge.connected .status-dot {
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    .btn-bt {
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+      transition: transform 0.1s;
+    }
+
+    .btn-bt:active {
+      transform: scale(0.95);
+    }
+
+    .btn-bt.disconnect {
+      background: linear-gradient(135deg, #dc2626, #f97316);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+    }
+
+    /* Kawasan Kawalan Utama */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+      padding-top: 8px;
+    }
+
+    .joystick-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .zone-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #94a3b8;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    /* Tapak Joystick */
+    .joystick-base {
+      position: relative;
+      width: 195px;
+      height: 195px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 2px solid rgba(0, 245, 212, 0.35);
+      box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 245, 212, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Panduan Arah pada Joystick */
+    .dir-hint {
+      position: absolute;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.35);
+      pointer-events: none;
+    }
+
+    .hint-up { top: 10px; }
+    .hint-down { bottom: 10px; }
+    .hint-left { left: 12px; }
+    .hint-right { right: 12px; }
+
+    /* Garis Panduan Paksi */
+    .axis-vertical {
+      position: absolute;
+      width: 4px;
+      height: 75%;
+      background: rgba(0, 245, 212, 0.15);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    .axis-horizontal {
+      position: absolute;
+      width: 75%;
+      height: 4px;
+      background: rgba(0, 187, 249, 0.15);
+      border-radius: 4px;
+      pointer-events: none;
+    }
+
+    /* Tombol Joystick (Knob) */
+    .joystick-knob {
+      position: absolute;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #00f5d4, #0284c7);
+      border: 3px solid #ffffff;
+      box-shadow: 0 6px 18px rgba(0, 245, 212, 0.5);
+      transform: translate(0px, 0px);
+      transition: transform 0.08s ease-out;
+      pointer-events: none;
+    }
+
+    .joystick-knob.right-knob {
+      background: radial-gradient(circle at 30% 30%, #38bdf8, #4f46e5);
+      box-shadow: 0 6px 18px rgba(56, 189, 248, 0.5);
+    }
+
+    .joystick-knob.active {
+      transition: none;
+    }
+
+    /* Panel Tengah */
+    .center-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 18px;
+      border-radius: 18px;
+      min-width: 155px;
+    }
+
+    .cmd-display {
+      width: 100%;
+      text-align: center;
+      background: #090d16;
+      border: 1px solid rgba(0, 245, 212, 0.3);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .cmd-display span {
+      display: block;
+      font-size: 0.68rem;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .cmd-display strong {
+      font-size: 1.15rem;
+      color: #00f5d4;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 12px 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      color: #fff;
+      letter-spacing: 0.5px;
+      transition: transform 0.08s;
+    }
+
+    .action-btn:active {
+      transform: scale(0.94);
+    }
+
+    .btn-horn {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-stop {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-fs {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.78rem;
+      padding: 8px 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Skrin Amaran Jika Portrait -->
+  <div id="portrait-warning">
+    <h2>Sila Putar Telefon Anda</h2>
+    <p>Gunakan mod <strong>Landscape (Melintang)</strong> untuk mengawal micro:bit.</p>
+  </div>
+
+  <div class="container">
+    <!-- Bar Atas: Nama Ikmal hensem & Bluetooth di Kanan Atas -->
+    <header>
+      <div class="brand">
+        <div class="brand-title">Ikmal hensem</div>
+        <div class="brand-sub">micro:bit UART RC</div>
+      </div>
+
+      <div class="bt-controls">
+        <div id="statusBadge" class="status-badge">
+          <div class="status-dot"></div>
+          <span id="statusText">Terputus</span>
         </div>
+        <button id="btBtn" class="btn-bt" onclick="toggleBluetooth()">Sambung Bluetooth</button>
+      </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4 pb-20">
-
-        <!-- Toast Notification (Hidden by default) -->
-        <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white text-sm px-4 py-2 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            <span id="toast-text">Copied to clipboard!</span>
+    <!-- Kawasan Joystick & Butang -->
+    <main>
+      <!-- KIRI: Joystick Depan & Belakang -->
+      <div class="joystick-zone">
+        <div class="zone-label">Depan / Belakang</div>
+        <div id="leftBase" class="joystick-base">
+          <div class="axis-vertical"></div>
+          <span class="dir-hint hint-up">▲ DEPAN</span>
+          <span class="dir-hint hint-down">▼ BELAKANG</span>
+          <div id="leftKnob" class="joystick-knob"></div>
         </div>
+      </div>
 
-        <!-- Add New Snippet Form -->
-        <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-sm space-y-3">
-            <h2 class="text-sm font-semibold text-slate-300">Add New Quick Text</h2>
-            <div class="space-y-2">
-                <textarea id="snippetInput" rows="2" placeholder="Type or paste quick reply text here..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 resize-none"></textarea>
-                <button onclick="addSnippet()" class="w-full bg-purple-600 hover:bg-purple-500 active:scale-[0.98] transition text-white font-medium text-sm py-2.5 rounded-lg shadow-sm">
-                    Save Snippet
-                </button>
-            </div>
+      <!-- TENGAH: Status Arahan, Horn, Stop & Skrin Penuh -->
+      <div class="center-panel">
+        <div class="cmd-display">
+          <span>Arahan Semasa</span>
+          <strong id="cmdLabel">STOP</strong>
         </div>
+        <button class="action-btn btn-horn" onclick="sendHorn()">📯 HORN</button>
+        <button class="action-btn btn-stop" onclick="forceStop()">🛑 STOP</button>
+        <button class="action-btn btn-fs" onclick="toggleFullscreen()">⛶ Skrin Penuh</button>
+      </div>
 
-        <!-- Snippets List Section -->
-        <div class="space-y-2">
-            <div class="flex justify-between items-center px-1">
-                <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Saved Snippets</h2>
-                <span id="countBadge" class="text-xs text-slate-500">0 items</span>
-            </div>
-            
-            <div id="snippetsList" class="space-y-2.5">
-                <!-- Dynamically injected items will appear here -->
-            </div>
+      <!-- KANAN: Joystick Kiri & Kanan -->
+      <div class="joystick-zone">
+        <div class="zone-label">Kiri / Kanan</div>
+        <div id="rightBase" class="joystick-base">
+          <div class="axis-horizontal"></div>
+          <span class="dir-hint hint-left">◀ KIRI</span>
+          <span class="dir-hint hint-right">KANAN ▶</span>
+          <div id="rightKnob" class="joystick-knob right-knob"></div>
         </div>
-
+      </div>
     </main>
+  </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        // Default initial snippets if storage is empty
-        const defaultSnippets = [
-            "Hello! Welcome to Ikmal Tech Solution. How can I help with your laptop today?",
-            "RM50 deposit received, thank you! We will proceed with the repair.",
-            "Please send your laptop model and exact issue description.",
-            "Your device is ready for self-collection at Blok A12."
-        ];
+  <script>
+    // Nordic UART Service UUIDs untuk BBC micro:bit
+    const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+    const UART_TX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // micro:bit terima data (Write)
+    const UART_RX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // micro:bit hantar data (Notify)
 
-        let snippets = JSON.parse(localStorage.getItem('ikmal_clipboard_snippets')) || defaultSnippets;
+    let bluetoothDevice = null;
+    let rxCharacteristic = null;
+    let isConnected = false;
+    let isWriting = false;
+    let lastSentCmd = "";
 
-        function saveToLocalStorage() {
-            localStorage.setItem('ikmal_clipboard_snippets', JSON.stringify(snippets));
+    const btBtn = document.getElementById("btBtn");
+    const statusBadge = document.getElementById("statusBadge");
+    const statusText = document.getElementById("statusText");
+    const cmdLabel = document.getElementById("cmdLabel");
+
+    // Sambung / Putus Bluetooth
+    async function toggleBluetooth() {
+      if (isConnected && bluetoothDevice) {
+        bluetoothDevice.gatt.disconnect();
+        return;
+      }
+
+      if (!navigator.bluetooth) {
+        alert("Pelayar ini tidak menyokong Web Bluetooth. Sila guna Google Chrome di Android dan buka melalui HTTPS (contoh: GitHub Pages).");
+        return;
+      }
+
+      try {
+        statusText.textContent = "Mencari...";
+        bluetoothDevice = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: "BBC micro:bit" }],
+          optionalServices: [UART_SERVICE_UUID]
+        });
+
+        bluetoothDevice.addEventListener("gattserverdisconnected", onDisconnected);
+
+        statusText.textContent = "Menyambung...";
+        const server = await bluetoothDevice.gatt.connect();
+        const service = await server.getPrimaryService(UART_SERVICE_UUID);
+
+        // Pada micro:bit UART, Characteristic 0003 digunakan untuk menulis ke micro:bit
+        try {
+          rxCharacteristic = await service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
+        } catch (e) {
+          rxCharacteristic = await service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
         }
 
-        function renderSnippets() {
-            const listContainer = document.getElementById('snippetsList');
-            const countBadge = document.getElementById('countBadge');
-            listContainer.innerHTML = '';
-            countBadge.innerText = `${snippets.length} items`;
+        isConnected = true;
+        updateUIState(true);
+        sendCommand("stop", true);
+      } catch (error) {
+        console.error("Ralat Bluetooth:", error);
+        onDisconnected();
+      }
+    }
 
-            if (snippets.length === 0) {
-                listContainer.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">No snippets saved yet. Add one above!</div>`;
-                return;
-            }
+    function onDisconnected() {
+      isConnected = false;
+      rxCharacteristic = null;
+      lastSentCmd = "";
+      updateUIState(false);
+    }
 
-            snippets.forEach((text, index) => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-800 border border-slate-700/80 rounded-xl p-3.5 flex items-start justify-between space-x-3 shadow-sm hover:border-slate-600 transition";
-                
-                card.innerHTML = `
-                    <div class="flex-1 text-sm text-slate-200 break-words leading-relaxed">${escapeHtml(text)}</div>
-                    <div class="flex items-center space-x-2 shrink-0">
-                        <button onclick="copySnippet(${index})" class="bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-medium px-3 py-1.5 rounded-lg transition active:scale-95">
-                            Copy
-                        </button>
-                        <button onclick="deleteSnippet(${index})" class="text-slate-500 hover:text-red-400 p-1.5 transition" title="Delete">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </div>
-                `;
-                listContainer.appendChild(card);
-            });
+    function updateUIState(connected) {
+      if (connected) {
+        statusBadge.classList.add("connected");
+        statusText.textContent = "Bersambung";
+        btBtn.textContent = "Putuskan";
+        btBtn.classList.add("disconnect");
+      } else {
+        statusBadge.classList.remove("connected");
+        statusText.textContent = "Terputus";
+        btBtn.textContent = "Sambung Bluetooth";
+        btBtn.classList.remove("disconnect");
+      }
+    }
+
+    // Hantar arahan UART dengan penamat baris baharu (\n)
+    async function sendCommand(cmd, force = false) {
+      cmdLabel.textContent = cmd.toUpperCase();
+
+      if (!force && cmd === lastSentCmd) return;
+      lastSentCmd = cmd;
+
+      if (!isConnected || !rxCharacteristic || isWriting) return;
+
+      try {
+        isWriting = true;
+        const encoder = new TextEncoder();
+        const data = encoder.encode(cmd + "\n");
+
+        if (rxCharacteristic.properties.writeWithoutResponse) {
+          await rxCharacteristic.writeValueWithoutResponse(data);
+        } else {
+          await rxCharacteristic.writeValue(data);
         }
+      } catch (err) {
+        console.error("Gagal hantar arahan:", err);
+      } finally {
+        isWriting = false;
+      }
+    }
 
-        function addSnippet() {
-            const input = document.getElementById('snippetInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            snippets.unshift(text); // Add to the top
-            saveToLocalStorage();
-            input.value = '';
-            renderSnippets();
+    function sendHorn() {
+      sendCommand("horn", true);
+      setTimeout(() => {
+        if (lastSentCmd === "horn") {
+          lastSentCmd = "";
         }
+      }, 300);
+    }
 
-        function deleteSnippet(index) {
-            snippets.splice(index, 1);
-            saveToLocalStorage();
-            renderSnippets();
+    function forceStop() {
+      resetKnob(leftKnob);
+      resetKnob(rightKnob);
+      sendCommand("stop", true);
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch(() => {});
         }
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
 
-        function copySnippet(index) {
-            const textToCopy = snippets[index];
-            
-            // Modern clipboard API fallback
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(textToCopy).then(() => {
-                    showToast();
-                }).catch(err => {
-                    fallbackCopy(textToCopy);
-                });
-            } else {
-                fallbackCopy(textToCopy);
-            }
+    // Pengurusan Multi-Touch Joystick
+    const leftBase = document.getElementById("leftBase");
+    const leftKnob = document.getElementById("leftKnob");
+    const rightBase = document.getElementById("rightBase");
+    const rightKnob = document.getElementById("rightKnob");
+
+    let leftTouchId = null;
+    let rightTouchId = null;
+    const maxRadius = 60;
+    const deadzone = 20;
+
+    function resetKnob(knob) {
+      knob.classList.remove("active");
+      knob.style.transform = "translate(0px, 0px)";
+    }
+
+    function handleLeftMove(clientX, clientY) {
+      const rect = leftBase.getBoundingClientRect();
+      const centerY = rect.top + rect.height / 2;
+      let dy = clientY - centerY;
+
+      // Hadkan pergerakan menegak sahaja (Depan / Belakang)
+      if (dy > maxRadius) dy = maxRadius;
+      if (dy < -maxRadius) dy = -maxRadius;
+
+      leftKnob.style.transform = `translate(0px, ${dy}px)`;
+
+      if (dy < -deadzone) {
+        sendCommand("up");
+      } else if (dy > deadzone) {
+        sendCommand("down");
+      } else {
+        sendCommand("stop");
+      }
+    }
+
+    function handleRightMove(clientX, clientY) {
+      const rect = rightBase.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      let dx = clientX - centerX;
+
+      // Hadkan pergerakan mendatar sahaja (Kiri / Kanan)
+      if (dx > maxRadius) dx = maxRadius;
+      if (dx < -maxRadius) dx = -maxRadius;
+
+      rightKnob.style.transform = `translate(${dx}px, 0px)`;
+
+      if (dx < -deadzone) {
+        sendCommand("left");
+      } else if (dx > deadzone) {
+        sendCommand("right");
+      } else {
+        sendCommand("stop");
+      }
+    }
+
+    // Event Sentuhan Joystick Kiri
+    leftBase.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      if (leftTouchId === null) {
+        const touch = e.changedTouches[0];
+        leftTouchId = touch.identifier;
+        leftKnob.classList.add("active");
+        handleLeftMove(touch.clientX, touch.clientY);
+      }
+    }, { passive: false });
+
+    leftBase.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        if (touch.identifier === leftTouchId) {
+          handleLeftMove(touch.clientX, touch.clientY);
         }
+      }
+    }, { passive: false });
 
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed'; // Avoid scrolling to bottom
-            document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showToast();
-            } catch (err) {
-                console.error('Failed to copy', err);
-            }
-            document.body.removeChild(textarea);
+    function endLeftTouch(e) {
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === leftTouchId) {
+          leftTouchId = null;
+          resetKnob(leftKnob);
+          sendCommand("stop");
         }
+      }
+    }
+    leftBase.addEventListener("touchend", endLeftTouch);
+    leftBase.addEventListener("touchcancel", endLeftTouch);
 
-        function showToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.remove('opacity-0');
-            toast.classList.add('opacity-100');
-            setTimeout(() => {
-                toast.classList.remove('opacity-100');
-                toast.classList.add('opacity-0');
-            }, 1500);
+    // Event Sentuhan Joystick Kanan
+    rightBase.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      if (rightTouchId === null) {
+        const touch = e.changedTouches[0];
+        rightTouchId = touch.identifier;
+        rightKnob.classList.add("active");
+        handleRightMove(touch.clientX, touch.clientY);
+      }
+    }, { passive: false });
+
+    rightBase.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        if (touch.identifier === rightTouchId) {
+          handleRightMove(touch.clientX, touch.clientY);
         }
+      }
+    }, { passive: false });
 
-        function escapeHtml(string) {
-            return string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    function endRightTouch(e) {
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === rightTouchId) {
+          rightTouchId = null;
+          resetKnob(rightKnob);
+          sendCommand("stop");
         }
-
-        // Initial render on load
-        renderSnippets();
-    </script>
+      }
+    }
+    rightBase.addEventListener("touchend", endRightTouch);
+    rightBase.addEventListener("touchcancel", endRightTouch);
+  </script>
 </body>
 </html>
