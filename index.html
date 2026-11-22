@@ -2,8 +2,10 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Ikmal hensem - micro:bit Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Joystick By Ikmal Hensem - micro:bit Controller</title>
   <style>
     * {
       box-sizing: border-box;
@@ -17,6 +19,7 @@
     html, body {
       width: 100%;
       height: 100%;
+      height: 100dvh;
       overflow: hidden;
       background: radial-gradient(circle at center, #16213e 0%, #0b0f19 100%);
       color: #ffffff;
@@ -60,7 +63,18 @@
       flex-direction: column;
       width: 100vw;
       height: 100vh;
-      padding: 12px 20px;
+      height: 100dvh;
+      padding: 10px max(18px, env(safe-area-inset-right)) 10px max(18px, env(safe-area-inset-left));
+    }
+
+    /* Mod iOS / Pseudo Fullscreen */
+    body.ios-fullscreen .container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      z-index: 500;
+      background: radial-gradient(circle at center, #16213e 0%, #0b0f19 100%);
     }
 
     /* Bar Atas */
@@ -68,7 +82,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 54px;
+      height: 52px;
       padding: 0 14px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -78,8 +92,9 @@
 
     .brand {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .brand-title {
@@ -91,12 +106,10 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .brand-sub {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 3px 8px;
-      border-radius: 6px;
+    .brand-by {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #9ca3af;
     }
 
     .bt-controls {
@@ -166,9 +179,10 @@
       align-items: center;
       gap: 16px;
       padding-top: 8px;
+      min-height: 0;
     }
 
-    .joystick-zone {
+    .control-zone {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -188,8 +202,8 @@
     /* Tapak Joystick */
     .joystick-base {
       position: relative;
-      width: 195px;
-      height: 195px;
+      width: 190px;
+      height: 190px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
       border: 2px solid rgba(0, 245, 212, 0.35);
@@ -199,7 +213,6 @@
       justify-content: center;
     }
 
-    /* Panduan Arah pada Joystick */
     .dir-hint {
       position: absolute;
       font-size: 0.72rem;
@@ -213,7 +226,6 @@
     .hint-left { left: 12px; }
     .hint-right { right: 12px; }
 
-    /* Garis Panduan Paksi */
     .axis-vertical {
       position: absolute;
       width: 4px;
@@ -232,11 +244,10 @@
       pointer-events: none;
     }
 
-    /* Tombol Joystick (Knob) */
     .joystick-knob {
       position: absolute;
-      width: 74px;
-      height: 74px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #00f5d4, #0284c7);
       border: 3px solid #ffffff;
@@ -255,18 +266,118 @@
       transition: none;
     }
 
+    /* Kawalan Arrow (Tap) */
+    .arrow-pad-vertical {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .arrow-pad-horizontal {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .arrow-btn {
+      width: 86px;
+      height: 86px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+      border: 2px solid rgba(0, 245, 212, 0.4);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      color: #00f5d4;
+      font-size: 1.8rem;
+      font-weight: 800;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.06s, background 0.06s, border-color 0.06s;
+    }
+
+    .arrow-btn.right-arrow {
+      border-color: rgba(56, 189, 248, 0.45);
+      color: #38bdf8;
+    }
+
+    .arrow-btn small {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+
+    .arrow-btn.pressed {
+      transform: scale(0.92);
+      background: linear-gradient(135deg, #00f5d4, #0284c7);
+      border-color: #ffffff;
+      color: #090d16;
+      box-shadow: 0 0 20px rgba(0, 245, 212, 0.65);
+    }
+
+    .arrow-btn.right-arrow.pressed {
+      background: linear-gradient(135deg, #38bdf8, #4f46e5);
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.65);
+    }
+
+    .arrow-btn.pressed small {
+      color: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
     /* Panel Tengah */
     .center-panel {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px 18px;
+      padding: 12px 16px;
       border-radius: 18px;
-      min-width: 155px;
+      min-width: 162px;
+    }
+
+    /* Pemilih 2 Mod */
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+      background: #090d16;
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      gap: 3px;
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 6px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, #00f5d4, #0284c7);
+      color: #090d16;
+      box-shadow: 0 2px 8px rgba(0, 245, 212, 0.35);
     }
 
     .cmd-display {
@@ -275,18 +386,18 @@
       background: #090d16;
       border: 1px solid rgba(0, 245, 212, 0.3);
       border-radius: 10px;
-      padding: 8px 10px;
+      padding: 6px 10px;
     }
 
     .cmd-display span {
       display: block;
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       color: #64748b;
       text-transform: uppercase;
     }
 
     .cmd-display strong {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       color: #00f5d4;
       font-family: monospace;
       letter-spacing: 1px;
@@ -294,10 +405,10 @@
 
     .action-btn {
       width: 100%;
-      padding: 12px 14px;
+      padding: 10px 12px;
       border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
+      border-radius: 11px;
+      font-size: 0.88rem;
       font-weight: 800;
       cursor: pointer;
       color: #fff;
@@ -322,8 +433,8 @@
     .btn-fs {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 0.78rem;
-      padding: 8px 10px;
+      font-size: 0.75rem;
+      padding: 7px 10px;
     }
   </style>
 </head>
@@ -336,11 +447,11 @@
   </div>
 
   <div class="container">
-    <!-- Bar Atas: Nama Ikmal hensem & Bluetooth di Kanan Atas -->
+    <!-- Bar Atas: Nama Joystick By Ikmal Hensem & Bluetooth di Kanan Atas -->
     <header>
       <div class="brand">
-        <div class="brand-title">Ikmal hensem</div>
-        <div class="brand-sub">micro:bit UART RC</div>
+        <div class="brand-title">Joystick</div>
+        <div class="brand-by">By Ikmal Hensem</div>
       </div>
 
       <div class="bt-controls">
@@ -352,38 +463,56 @@
       </div>
     </header>
 
-    <!-- Kawasan Joystick & Butang -->
+    <!-- Kawasan Kawalan Utama -->
     <main>
-      <!-- KIRI: Joystick Depan & Belakang -->
-      <div class="joystick-zone">
+      <!-- KIRI: Depan & Belakang (Joystick / Arrow) -->
+      <div class="control-zone">
         <div class="zone-label">Depan / Belakang</div>
-        <div id="leftBase" class="joystick-base">
+
+        <div id="leftJoystickUI" class="joystick-base">
           <div class="axis-vertical"></div>
           <span class="dir-hint hint-up">▲ DEPAN</span>
           <span class="dir-hint hint-down">▼ BELAKANG</span>
           <div id="leftKnob" class="joystick-knob"></div>
         </div>
+
+        <div id="leftArrowUI" class="arrow-pad-vertical hidden">
+          <button id="btnUp" class="arrow-btn" data-cmd="up">▲<small>DEPAN</small></button>
+          <button id="btnDown" class="arrow-btn" data-cmd="down">▼<small>BELAKANG</small></button>
+        </div>
       </div>
 
-      <!-- TENGAH: Status Arahan, Horn, Stop & Skrin Penuh -->
+      <!-- TENGAH: Pilih 2 Mod, Status Arahan, Horn, Stop & Skrin Penuh -->
       <div class="center-panel">
+        <div class="mode-switch">
+          <button id="modeJoystickBtn" class="mode-btn active" onclick="setControlMode('joystick')">JOYSTICK</button>
+          <button id="modeArrowBtn" class="mode-btn" onclick="setControlMode('arrow')">ARROW</button>
+        </div>
+
         <div class="cmd-display">
           <span>Arahan Semasa</span>
           <strong id="cmdLabel">STOP</strong>
         </div>
+
         <button class="action-btn btn-horn" onclick="sendHorn()">📯 HORN</button>
         <button class="action-btn btn-stop" onclick="forceStop()">🛑 STOP</button>
-        <button class="action-btn btn-fs" onclick="toggleFullscreen()">⛶ Skrin Penuh</button>
+        <button id="fsBtn" class="action-btn btn-fs" onclick="toggleFullscreen()">⛶ Skrin Penuh</button>
       </div>
 
-      <!-- KANAN: Joystick Kiri & Kanan -->
-      <div class="joystick-zone">
+      <!-- KANAN: Kiri & Kanan (Joystick / Arrow) -->
+      <div class="control-zone">
         <div class="zone-label">Kiri / Kanan</div>
-        <div id="rightBase" class="joystick-base">
+
+        <div id="rightJoystickUI" class="joystick-base">
           <div class="axis-horizontal"></div>
           <span class="dir-hint hint-left">◀ KIRI</span>
           <span class="dir-hint hint-right">KANAN ▶</span>
           <div id="rightKnob" class="joystick-knob right-knob"></div>
+        </div>
+
+        <div id="rightArrowUI" class="arrow-pad-horizontal hidden">
+          <button id="btnLeft" class="arrow-btn right-arrow" data-cmd="left">◀<small>KIRI</small></button>
+          <button id="btnRight" class="arrow-btn right-arrow" data-cmd="right">▶<small>KANAN</small></button>
         </div>
       </div>
     </main>
@@ -392,19 +521,120 @@
   <script>
     // Nordic UART Service UUIDs untuk BBC micro:bit
     const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-    const UART_TX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // micro:bit terima data (Write)
-    const UART_RX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // micro:bit hantar data (Notify)
+    const UART_TX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+    const UART_RX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
     let bluetoothDevice = null;
     let rxCharacteristic = null;
     let isConnected = false;
     let isWriting = false;
     let lastSentCmd = "";
+    let iosPseudoFullscreen = false;
+    let currentMode = "joystick";
 
     const btBtn = document.getElementById("btBtn");
     const statusBadge = document.getElementById("statusBadge");
     const statusText = document.getElementById("statusText");
     const cmdLabel = document.getElementById("cmdLabel");
+    const fsBtn = document.getElementById("fsBtn");
+
+    const modeJoystickBtn = document.getElementById("modeJoystickBtn");
+    const modeArrowBtn = document.getElementById("modeArrowBtn");
+    const leftJoystickUI = document.getElementById("leftJoystickUI");
+    const rightJoystickUI = document.getElementById("rightJoystickUI");
+    const leftArrowUI = document.getElementById("leftArrowUI");
+    const rightArrowUI = document.getElementById("rightArrowUI");
+
+    // Tukar antara Mod Joystick dan Mod Arrow (Tap)
+    function setControlMode(mode) {
+      if (mode === currentMode) return;
+      currentMode = mode;
+
+      // Reset sebarang pergerakan aktif sebelum tukar mod
+      leftTouchId = null;
+      rightTouchId = null;
+      resetKnob(leftKnob);
+      resetKnob(rightKnob);
+      activeArrowTouches.clear();
+      document.querySelectorAll(".arrow-btn").forEach((b) => b.classList.remove("pressed"));
+      sendCommand("stop", true);
+
+      if (mode === "joystick") {
+        modeJoystickBtn.classList.add("active");
+        modeArrowBtn.classList.remove("active");
+        leftJoystickUI.classList.remove("hidden");
+        rightJoystickUI.classList.remove("hidden");
+        leftArrowUI.classList.add("hidden");
+        rightArrowUI.classList.add("hidden");
+      } else {
+        modeArrowBtn.classList.add("active");
+        modeJoystickBtn.classList.remove("active");
+        leftJoystickUI.classList.add("hidden");
+        rightJoystickUI.classList.add("hidden");
+        leftArrowUI.classList.remove("hidden");
+        rightArrowUI.classList.remove("hidden");
+      }
+    }
+
+    function isIOSDevice() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    }
+
+    function updateFullscreenButtonLabel() {
+      const nativeActive = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement
+      );
+      const active = nativeActive || iosPseudoFullscreen;
+      fsBtn.textContent = active ? "🗗 Keluar Penuh" : "⛶ Skrin Penuh";
+    }
+
+    async function toggleFullscreen() {
+      const el = document.documentElement;
+      const nativeActive = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement
+      );
+
+      if (!isIOSDevice()) {
+        try {
+          if (!nativeActive) {
+            const req = el.requestFullscreen || el.webkitRequestFullscreen;
+            if (req) {
+              await req.call(el);
+              if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock("landscape").catch(() => {});
+              }
+              updateFullscreenButtonLabel();
+              return;
+            }
+          } else {
+            const exit = document.exitFullscreen || document.webkitExitFullscreen;
+            if (exit) {
+              await exit.call(document);
+              updateFullscreenButtonLabel();
+              return;
+            }
+          }
+        } catch (e) {
+          // Jatuh ke mod fallback di bawah jika gagal
+        }
+      }
+
+      iosPseudoFullscreen = !iosPseudoFullscreen;
+      document.body.classList.toggle("ios-fullscreen", iosPseudoFullscreen);
+
+      if (iosPseudoFullscreen) {
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+        }, 50);
+      }
+      updateFullscreenButtonLabel();
+    }
+
+    document.addEventListener("fullscreenchange", updateFullscreenButtonLabel);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenButtonLabel);
 
     // Sambung / Putus Bluetooth
     async function toggleBluetooth() {
@@ -414,7 +644,7 @@
       }
 
       if (!navigator.bluetooth) {
-        alert("Pelayar ini tidak menyokong Web Bluetooth. Sila guna Google Chrome di Android dan buka melalui HTTPS (contoh: GitHub Pages).");
+        alert("Pelayar ini tidak menyokong Web Bluetooth. Pada Android guna Google Chrome, dan pada iPhone buka pautan HTTPS ini dalam Bluefy.");
         return;
       }
 
@@ -431,7 +661,6 @@
         const server = await bluetoothDevice.gatt.connect();
         const service = await server.getPrimaryService(UART_SERVICE_UUID);
 
-        // Pada micro:bit UART, Characteristic 0003 digunakan untuk menulis ke micro:bit
         try {
           rxCharacteristic = await service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
         } catch (e) {
@@ -506,29 +735,18 @@
     function forceStop() {
       resetKnob(leftKnob);
       resetKnob(rightKnob);
+      activeArrowTouches.clear();
+      document.querySelectorAll(".arrow-btn").forEach((b) => b.classList.remove("pressed"));
       sendCommand("stop", true);
     }
 
-    function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock("landscape").catch(() => {});
-        }
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    }
-
     // Pengurusan Multi-Touch Joystick
-    const leftBase = document.getElementById("leftBase");
     const leftKnob = document.getElementById("leftKnob");
-    const rightBase = document.getElementById("rightBase");
     const rightKnob = document.getElementById("rightKnob");
 
     let leftTouchId = null;
     let rightTouchId = null;
-    const maxRadius = 60;
+    const maxRadius = 58;
     const deadzone = 20;
 
     function resetKnob(knob) {
@@ -537,11 +755,10 @@
     }
 
     function handleLeftMove(clientX, clientY) {
-      const rect = leftBase.getBoundingClientRect();
+      const rect = leftJoystickUI.getBoundingClientRect();
       const centerY = rect.top + rect.height / 2;
       let dy = clientY - centerY;
 
-      // Hadkan pergerakan menegak sahaja (Depan / Belakang)
       if (dy > maxRadius) dy = maxRadius;
       if (dy < -maxRadius) dy = -maxRadius;
 
@@ -557,11 +774,10 @@
     }
 
     function handleRightMove(clientX, clientY) {
-      const rect = rightBase.getBoundingClientRect();
+      const rect = rightJoystickUI.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       let dx = clientX - centerX;
 
-      // Hadkan pergerakan mendatar sahaja (Kiri / Kanan)
       if (dx > maxRadius) dx = maxRadius;
       if (dx < -maxRadius) dx = -maxRadius;
 
@@ -576,8 +792,7 @@
       }
     }
 
-    // Event Sentuhan Joystick Kiri
-    leftBase.addEventListener("touchstart", (e) => {
+    leftJoystickUI.addEventListener("touchstart", (e) => {
       e.preventDefault();
       if (leftTouchId === null) {
         const touch = e.changedTouches[0];
@@ -587,7 +802,7 @@
       }
     }, { passive: false });
 
-    leftBase.addEventListener("touchmove", (e) => {
+    leftJoystickUI.addEventListener("touchmove", (e) => {
       e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
         const touch = e.changedTouches[i];
@@ -606,11 +821,10 @@
         }
       }
     }
-    leftBase.addEventListener("touchend", endLeftTouch);
-    leftBase.addEventListener("touchcancel", endLeftTouch);
+    leftJoystickUI.addEventListener("touchend", endLeftTouch);
+    leftJoystickUI.addEventListener("touchcancel", endLeftTouch);
 
-    // Event Sentuhan Joystick Kanan
-    rightBase.addEventListener("touchstart", (e) => {
+    rightJoystickUI.addEventListener("touchstart", (e) => {
       e.preventDefault();
       if (rightTouchId === null) {
         const touch = e.changedTouches[0];
@@ -620,7 +834,7 @@
       }
     }, { passive: false });
 
-    rightBase.addEventListener("touchmove", (e) => {
+    rightJoystickUI.addEventListener("touchmove", (e) => {
       e.preventDefault();
       for (let i = 0; i < e.changedTouches.length; i++) {
         const touch = e.changedTouches[i];
@@ -639,8 +853,66 @@
         }
       }
     }
-    rightBase.addEventListener("touchend", endRightTouch);
-    rightBase.addEventListener("touchcancel", endRightTouch);
+    rightJoystickUI.addEventListener("touchend", endRightTouch);
+    rightJoystickUI.addEventListener("touchcancel", endRightTouch);
+
+    // Pengurusan Butang Arrow (Tap & Tahan)
+    const activeArrowTouches = new Map(); // touchIdentifier -> { btn, cmd }
+
+    function refreshArrowState() {
+      const allButtons = document.querySelectorAll(".arrow-btn");
+      allButtons.forEach((b) => b.classList.remove("pressed"));
+
+      let activeCmd = null;
+      activeArrowTouches.forEach(({ btn, cmd }) => {
+        btn.classList.add("pressed");
+        activeCmd = cmd;
+      });
+
+      if (activeCmd) {
+        sendCommand(activeCmd);
+      } else {
+        sendCommand("stop");
+      }
+    }
+
+    document.querySelectorAll(".arrow-btn").forEach((btn) => {
+      const cmd = btn.getAttribute("data-cmd");
+
+      btn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const touch = e.changedTouches[i];
+          activeArrowTouches.set(touch.identifier, { btn, cmd });
+        }
+        refreshArrowState();
+      }, { passive: false });
+
+      function releaseArrowTouch(e) {
+        e.preventDefault();
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          activeArrowTouches.delete(e.changedTouches[i].identifier);
+        }
+        refreshArrowState();
+      }
+
+      btn.addEventListener("touchend", releaseArrowTouch, { passive: false });
+      btn.addEventListener("touchcancel", releaseArrowTouch, { passive: false });
+
+      // Sokongan tetikus / klik pada desktop
+      btn.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        activeArrowTouches.set("mouse", { btn, cmd });
+        refreshArrowState();
+      });
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (activeArrowTouches.has("mouse")) {
+        activeArrowTouches.delete("mouse");
+        refreshArrowState();
+      }
+    });
   </script>
 </body>
 </html>
