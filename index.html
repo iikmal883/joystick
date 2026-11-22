@@ -2,10 +2,8 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Joystick By Ikmal Hensem - micro:bit Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ikmal hensem - micro:bit Controller</title>
   <style>
     * {
       box-sizing: border-box;
@@ -19,7 +17,6 @@
     html, body {
       width: 100%;
       height: 100%;
-      height: 100dvh;
       overflow: hidden;
       background: radial-gradient(circle at center, #16213e 0%, #0b0f19 100%);
       color: #ffffff;
@@ -63,18 +60,7 @@
       flex-direction: column;
       width: 100vw;
       height: 100vh;
-      height: 100dvh;
-      padding: 10px max(18px, env(safe-area-inset-right)) 10px max(18px, env(safe-area-inset-left));
-    }
-
-    /* Mod iOS / Pseudo Fullscreen */
-    body.ios-fullscreen .container {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100dvh;
-      z-index: 500;
-      background: radial-gradient(circle at center, #16213e 0%, #0b0f19 100%);
+      padding: 12px 20px;
     }
 
     /* Bar Atas */
@@ -82,7 +68,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 52px;
+      height: 54px;
       padding: 0 14px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -92,9 +78,8 @@
 
     .brand {
       display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
     }
 
     .brand-title {
@@ -106,10 +91,12 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .brand-by {
-      font-size: 0.78rem;
-      font-weight: 500;
-      color: #9ca3af;
+    .brand-sub {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 6px;
     }
 
     .bt-controls {
@@ -179,7 +166,6 @@
       align-items: center;
       gap: 16px;
       padding-top: 8px;
-      min-height: 0;
     }
 
     .joystick-zone {
@@ -202,8 +188,8 @@
     /* Tapak Joystick */
     .joystick-base {
       position: relative;
-      width: 190px;
-      height: 190px;
+      width: 195px;
+      height: 195px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
       border: 2px solid rgba(0, 245, 212, 0.35);
@@ -249,8 +235,8 @@
     /* Tombol Joystick (Knob) */
     .joystick-knob {
       position: absolute;
-      width: 72px;
-      height: 72px;
+      width: 74px;
+      height: 74px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #00f5d4, #0284c7);
       border: 3px solid #ffffff;
@@ -275,10 +261,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 14px 18px;
+      padding: 16px 18px;
       border-radius: 18px;
       min-width: 155px;
     }
@@ -289,7 +275,7 @@
       background: #090d16;
       border: 1px solid rgba(0, 245, 212, 0.3);
       border-radius: 10px;
-      padding: 7px 10px;
+      padding: 8px 10px;
     }
 
     .cmd-display span {
@@ -300,7 +286,7 @@
     }
 
     .cmd-display strong {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: #00f5d4;
       font-family: monospace;
       letter-spacing: 1px;
@@ -308,10 +294,10 @@
 
     .action-btn {
       width: 100%;
-      padding: 11px 14px;
+      padding: 12px 14px;
       border: none;
       border-radius: 12px;
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       font-weight: 800;
       cursor: pointer;
       color: #fff;
@@ -350,11 +336,11 @@
   </div>
 
   <div class="container">
-    <!-- Bar Atas: Nama Joystick By Ikmal Hensem & Bluetooth di Kanan Atas -->
+    <!-- Bar Atas: Nama Ikmal hensem & Bluetooth di Kanan Atas -->
     <header>
       <div class="brand">
-        <div class="brand-title">Joystick</div>
-        <div class="brand-by">By Ikmal Hensem</div>
+        <div class="brand-title">Ikmal hensem</div>
+        <div class="brand-sub">micro:bit UART RC</div>
       </div>
 
       <div class="bt-controls">
@@ -387,7 +373,7 @@
         </div>
         <button class="action-btn btn-horn" onclick="sendHorn()">📯 HORN</button>
         <button class="action-btn btn-stop" onclick="forceStop()">🛑 STOP</button>
-        <button id="fsBtn" class="action-btn btn-fs" onclick="toggleFullscreen()">⛶ Skrin Penuh</button>
+        <button class="action-btn btn-fs" onclick="toggleFullscreen()">⛶ Skrin Penuh</button>
       </div>
 
       <!-- KANAN: Joystick Kiri & Kanan -->
@@ -406,83 +392,19 @@
   <script>
     // Nordic UART Service UUIDs untuk BBC micro:bit
     const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-    const UART_TX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
-    const UART_RX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+    const UART_TX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // micro:bit terima data (Write)
+    const UART_RX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // micro:bit hantar data (Notify)
 
     let bluetoothDevice = null;
     let rxCharacteristic = null;
     let isConnected = false;
     let isWriting = false;
     let lastSentCmd = "";
-    let iosPseudoFullscreen = false;
 
     const btBtn = document.getElementById("btBtn");
     const statusBadge = document.getElementById("statusBadge");
     const statusText = document.getElementById("statusText");
     const cmdLabel = document.getElementById("cmdLabel");
-    const fsBtn = document.getElementById("fsBtn");
-
-    function isIOSDevice() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    }
-
-    function updateFullscreenButtonLabel() {
-      const nativeActive = !!(
-        document.fullscreenElement ||
-        document.webkitFullscreenElement
-      );
-      const active = nativeActive || iosPseudoFullscreen;
-      fsBtn.textContent = active ? "🗗 Keluar Penuh" : "⛶ Skrin Penuh";
-    }
-
-    async function toggleFullscreen() {
-      const el = document.documentElement;
-      const nativeActive = !!(
-        document.fullscreenElement ||
-        document.webkitFullscreenElement
-      );
-
-      // Cuba API standard / webkit dahulu jika bukan sekatan iOS
-      if (!isIOSDevice()) {
-        try {
-          if (!nativeActive) {
-            const req = el.requestFullscreen || el.webkitRequestFullscreen;
-            if (req) {
-              await req.call(el);
-              if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock("landscape").catch(() => {});
-              }
-              updateFullscreenButtonLabel();
-              return;
-            }
-          } else {
-            const exit = document.exitFullscreen || document.webkitExitFullscreen;
-            if (exit) {
-              await exit.call(document);
-              updateFullscreenButtonLabel();
-              return;
-            }
-          }
-        } catch (e) {
-          // Jatuh ke mod fallback di bawah jika gagal
-        }
-      }
-
-      // Fallback khusus iPhone / Bluefy (WebKit iOS tidak menyokong requestFullscreen pada elemen biasa)
-      iosPseudoFullscreen = !iosPseudoFullscreen;
-      document.body.classList.toggle("ios-fullscreen", iosPseudoFullscreen);
-
-      if (iosPseudoFullscreen) {
-        setTimeout(() => {
-          window.scrollTo(0, 1);
-        }, 50);
-      }
-      updateFullscreenButtonLabel();
-    }
-
-    document.addEventListener("fullscreenchange", updateFullscreenButtonLabel);
-    document.addEventListener("webkitfullscreenchange", updateFullscreenButtonLabel);
 
     // Sambung / Putus Bluetooth
     async function toggleBluetooth() {
@@ -492,7 +414,7 @@
       }
 
       if (!navigator.bluetooth) {
-        alert("Pelayar ini tidak menyokong Web Bluetooth. Pada iPhone, pastikan anda membuka pautan HTTPS ini di dalam aplikasi Bluefy.");
+        alert("Pelayar ini tidak menyokong Web Bluetooth. Sila guna Google Chrome di Android dan buka melalui HTTPS (contoh: GitHub Pages).");
         return;
       }
 
@@ -509,6 +431,7 @@
         const server = await bluetoothDevice.gatt.connect();
         const service = await server.getPrimaryService(UART_SERVICE_UUID);
 
+        // Pada micro:bit UART, Characteristic 0003 digunakan untuk menulis ke micro:bit
         try {
           rxCharacteristic = await service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
         } catch (e) {
@@ -586,6 +509,17 @@
       sendCommand("stop", true);
     }
 
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch(() => {});
+        }
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
     // Pengurusan Multi-Touch Joystick
     const leftBase = document.getElementById("leftBase");
     const leftKnob = document.getElementById("leftKnob");
@@ -594,7 +528,7 @@
 
     let leftTouchId = null;
     let rightTouchId = null;
-    const maxRadius = 58;
+    const maxRadius = 60;
     const deadzone = 20;
 
     function resetKnob(knob) {
@@ -607,6 +541,7 @@
       const centerY = rect.top + rect.height / 2;
       let dy = clientY - centerY;
 
+      // Hadkan pergerakan menegak sahaja (Depan / Belakang)
       if (dy > maxRadius) dy = maxRadius;
       if (dy < -maxRadius) dy = -maxRadius;
 
@@ -626,6 +561,7 @@
       const centerX = rect.left + rect.width / 2;
       let dx = clientX - centerX;
 
+      // Hadkan pergerakan mendatar sahaja (Kiri / Kanan)
       if (dx > maxRadius) dx = maxRadius;
       if (dx < -maxRadius) dx = -maxRadius;
 
